@@ -3,7 +3,7 @@ pipeine{
     agent any
     stages {
         stage ('git') {
-            steps git url: 'github.com/spring-projects/spring-petclinic.git',
+            steps git url: 'https://github.com/chandu54321/spring-petclinic12.git',
             branch: 'main'
         }
         stage ('build') {
