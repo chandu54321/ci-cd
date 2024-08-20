@@ -2,7 +2,7 @@ def call() {
 pipeine{
     agent any
     tools {
-        MAVEN_3.9.9
+        maven 'MAVEN_3.9.9'
     }
     stages {
         stage ('git') {
