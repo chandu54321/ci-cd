@@ -6,7 +6,7 @@ pipeine{
     }
     stages {
         stage ('git') {
-            steps git url: 'https://github.com/chandu54321/spring-petclinic12.git',
+            steps git url: 'https://github.com/spring-projects/spring-petclinic.git',
             branch: 'main'
         }
         stage ('build') {
