@@ -1,0 +1,33 @@
+pipeline {
+    agent any 
+    tools {
+        maven 'MAVEN_3.9.9'
+        jfrog 'jfrog-cli' 
+    }
+    triggers {
+        pollSCM('* * * * *')
+    }
+    stages {
+        stage('SCM') {
+            steps {
+                git url: 'https://github.com/spring-projects/spring-petclinic.git', 
+                    branch: 'main'
+            }
+            
+        }
+        
+        stage('Exec Maven command') {
+            steps {
+                // Configure Maven project's repositories
+                jf 'mvn-config --repo-resolve-releases qtlearning-libs-release --repo-resolve-snapshots qtlearning-libs-snapshot --repo-deploy-releases qtlearning-libs-release-local --repo-deploy-snapshots qtlearning-libs-snapshot-local'
+                // install and publish project
+                jf 'mvn clean install'
+            }
+        }
+        stage('build and publish') {
+            steps {
+                jr 'rt build-publish'
+            }
+        }
+    }
+}

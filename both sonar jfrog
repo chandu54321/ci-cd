@@ -1,0 +1,51 @@
+pipeline {
+    agent any 
+    tools {
+        maven 'MAVEN_3.9.9'
+        jfrog 'jfrog-cli' 
+    }
+    triggers {
+        pollSCM('* * * * *')
+    }
+    stages {
+        stage('SCM') {
+            steps {
+                git url: 'https://github.com/spring-projects/spring-petclinic.git', 
+                    branch: 'main'
+            }
+            
+        }
+        stage('BUILD') {
+            steps {
+                withSonarQubeEnv(credentialsId: 'SONAR_CLOUD', installationName: 'SONARCUBE_TOKEN') { // You can override the credential to be used
+				    sh 'mvn clean package org.sonarsource.scanner.maven:sonar-maven-plugin:3.7.0.1746:sonar -D sonar.organization=sring1 -D sonar.projectKey=be7b4e50c7d2682d953fc471209ce0738bb24d00'
+			    }
+			    junit testResults: '**/surefire-reports/*.xml'
+			    archive '**/target/spring-petclinic-*.jar'
+
+            }
+        }
+        stage('Exec Maven command') {
+            steps {
+                // Configure Maven project's repositories
+                jf 'mvn-config --repo-resolve-releases qtlearning-libs-release --repo-resolve-snapshots qtlearning-libs-snapshot --repo-deploy-releases qtlearning-libs-release-local --repo-deploy-snapshots qtlearning-libs-snapshot-local'
+                // install and publish project
+                jf 'mvn clean install'
+            }
+        }
+        stage('build and publish') {
+            steps {
+                jr 'rt build-publish'
+            }
+        }
+        stage("Quality Gate") {
+            steps {
+                timeout(time: 1, unit: 'HOURS') {
+                    // Parameter indicates whether to set pipeline to UNSTABLE if Quality Gate fails
+                    // true = set pipeline to UNSTABLE, false = don't
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+	}
+    }
+}
