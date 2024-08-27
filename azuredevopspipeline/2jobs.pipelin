@@ -1,0 +1,26 @@
+---
+stages:
+  - stage: dotnet
+    jobs:
+      - job: dotnetbuild
+        displayName: Build using Dotnet
+        pool:
+          vmImage: ubuntu-22.04
+        steps:
+        - task: DotNetCoreCLI@2
+          inputs:
+            command: 'build'
+            projects: eShopOnWeb.sln
+  - stage: docker
+    dependsOn: dotnet
+    jobs:
+      - job: dockercompose
+        displayName: Build using Docker Compose
+        pool:
+          vmImage: ubuntu-22.04
+        steps:
+        - task: DockerCompose@0
+          inputs:
+            containerregistrytype: 'Azure Container Registry'
+            dockerComposeFile: '**/docker-compose.yml'
+            action: Build services
