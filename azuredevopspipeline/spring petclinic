@@ -1,0 +1,25 @@
+pool:
+  vmImage: ubuntu-22.04
+
+trigger:
+  - main
+  
+schedules:
+  - cron: '30 1 * * 6'
+    displayName: Weekly build
+    branches:
+      include:
+        - main
+jobs:
+  - job: build
+    displayName: 'building using maven' 
+    steps:
+      - task: Maven@4
+        inputs:
+          mavenPOMFile: 'pom.xml'
+          goals: clean package
+          publishjunitResults: true
+          testResultsFiles: '**/surefire-reports/TEST-*.xml'
+          javaHomeOption: 'JDKVersion'
+          jdkVersionOption: '1.17'
+                 
